@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 构建产物
+build/
+dist/
+*.spec
+
+# 测试产物（运行测试时自动生成）
+test_recv_*/
+test_src/
+ui_recv_B/
+ui_screenshot.png
+*.log
+
+# 运行时数据
+config*.json
+*.pem
+
+# IDE / 系统
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
