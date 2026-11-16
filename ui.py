@@ -1054,8 +1054,11 @@ class MainWindow(QMainWindow):
         poll.setInterval(250)
 
         def _check_cancel():
+            # v1.10 修复：box.cancel_ev 是 TransferControl（其 .cancel_ev 才是 Event），
+            # 此前误按 Event 调 .is_set() 抛 AttributeError，弹窗出现 250ms 后即闪退
             cev = getattr(box, "cancel_ev", None)
-            if cev is not None and cev.is_set():
+            ev = getattr(cev, "cancel_ev", cev)   # TransferControl → 内部 Event；Event → 自身
+            if ev is not None and ev.is_set():
                 dlg.reject()
 
         poll.timeout.connect(_check_cancel)
@@ -1169,6 +1172,22 @@ def main():
     if hasattr(Qt, "AA_EnableHighDpiScaling"):
         QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     _fix_qt_plugin_path()
+
+    # 全局异常钩子：UI 槽/回调中未捕获的 Python 异常写入日志且不再 abort。
+    # PyQt5 默认行为是打印 stderr 后 qFatal 闪退（排查时日志里毫无痕迹），
+    # 覆盖 excepthook 后异常可追溯，进程继续运行。
+    import threading
+    import traceback as _tb
+
+    def _ui_excepthook(tp, val, tb):
+        try:
+            core.log.error("UI 未捕获异常：\n%s", "".join(_tb.format_exception(tp, val, tb)))
+        except Exception:
+            pass
+
+    sys.excepthook = _ui_excepthook
+    threading.excepthook = lambda a: _ui_excepthook(a.exc_type, a.exc_value, a.exc_traceback)
+
     app = QApplication(sys.argv)
     app.setApplicationName("Signal快传")
     app.setWindowIcon(make_app_icon())
