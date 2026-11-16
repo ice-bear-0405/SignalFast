@@ -221,7 +221,13 @@ def main():
     before_files = set(os.listdir(a.save_dir))
     t7 = core.SendTask(b_target_ip, b_target_port, "电脑-乙", paths=[big2])
     t7.start()
-    time.sleep(0.3)
+    # 等传输真正开始（accept 已返回、UDP 信令端口已交换、数据已在流动）
+    # ——避免取消落在“等待确认”阶段导致信令未达、接收端走保留分支
+    for _ in range(100):
+        if (t7.progress.get(t7.msg_id, {}).get("sent") or 0) > 0:
+            break
+        time.sleep(0.1)
+    time.sleep(0.3)          # 让并行子连接也建立
     t7.pause()
     time.sleep(0.5)
     t7.cancel()
@@ -237,7 +243,11 @@ def main():
     # 8c. 接收端主动取消：发送端中止，无残留
     t8 = core.SendTask(b_target_ip, b_target_port, "电脑-乙", paths=[big2])
     t8.start()
-    time.sleep(0.3)
+    for _ in range(100):
+        if (t8.progress.get(t8.msg_id, {}).get("sent") or 0) > 0:
+            break
+        time.sleep(0.1)
+    time.sleep(0.2)
     a.server.cancel_recv()
     t8.join(30)
     st8 = t8.progress.get(t8.msg_id, {}).get("state") or ""
@@ -338,6 +348,56 @@ def main():
     hist = core.load_history()
     report("传输历史已记录", len(hist) > 0 and ("direction" in hist[0]) and ("result" in hist[0]),
            "共 %d 条，最新: %s" % (len(hist), hist[0].get("direction") if hist else ""))
+
+    # 9f. 广播回执：对端发现包到达本机时回单播，对端据此反向发现本机
+    #     （模拟双网卡主机场景：其广播走默认路由网卡到不了对端热点网段，
+    #      只能被动收到对端广播，回执让双方互认）
+    #     使用独立端口实例，避开同机多实例 54545 单播投递竞争（测试环境特有）
+    import json as _json
+    import socket as _sockmod
+    c9 = core.DiscoveryService("id-replier", "电脑-回执", 54599, 0,
+                               port=core.DISCOVER_PORT + 50)
+    c9.start()
+    time.sleep(0.5)
+    rep = _sockmod.socket(_sockmod.AF_INET, _sockmod.SOCK_DGRAM)
+    rep.settimeout(4.0)
+    rep.bind(("127.0.0.1", 0))
+    disc_pkt = core.MAGIC + _json.dumps(
+        {"id": "id-prober", "name": "探测者", "tcp": 54601, "tls": 0,
+         "ip": "127.0.0.1", "t": "d"}, ensure_ascii=False)
+    rep.sendto(disc_pkt.encode("utf-8"), ("127.0.0.1", core.DISCOVER_PORT + 50))
+    info = {}
+    got_reply = False
+    reply_ok = False
+    try:
+        data, raddr = rep.recvfrom(65535)
+        got_reply = True
+        info = _json.loads(data[len(core.MAGIC):].decode("utf-8"))
+        reply_ok = (info.get("id") == "id-replier" and info.get("t") == "r"
+                    and int(info.get("tcp") or 0) == 54599)
+    except _sockmod.timeout:
+        pass
+    rep.close()
+    report("收到广播回执（单播互通）", got_reply and reply_ok,
+           "" if reply_ok else (str(info) if got_reply else "未收到回执"))
+    report("发现包正常入表", any(d.id == "id-prober" for d in c9.alive()))
+
+    # 回执不应再触发回执（防乒乓）：发送 t=r 报文后短窗口内应无任何回包
+    rep2 = _sockmod.socket(_sockmod.AF_INET, _sockmod.SOCK_DGRAM)
+    rep2.settimeout(1.2)
+    rep2.bind(("127.0.0.1", 0))
+    r_pkt = core.MAGIC + _json.dumps(
+        {"id": "id-prober", "name": "探测者", "tcp": 54601, "tls": 0,
+         "ip": "127.0.0.1", "t": "r"}, ensure_ascii=False)
+    rep2.sendto(r_pkt.encode("utf-8"), ("127.0.0.1", core.DISCOVER_PORT + 50))
+    no_pingpong = False
+    try:
+        rep2.recvfrom(65535)
+    except _sockmod.timeout:
+        no_pingpong = True
+    rep2.close()
+    c9.stop()
+    report("回执不触发回执（无乒乓）", no_pingpong)
 
     # 10. 大小格式化
     report("fmt_size", core.fmt_size(110 * 1024 * 1024) == "110.0 MB",

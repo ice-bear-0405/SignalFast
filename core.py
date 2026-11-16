@@ -27,9 +27,12 @@ CERT_B64 = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN6ekNDQWJlZ0F3SUJBZ0lVR3FT
 KEY_B64 = "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBcy82UHRSYWlLdk9qRjdNL0FLaVRPUThFTGhyNnVLZFh6MWZJT3VyVGNTRVNzMUR0CmdzWmlUM013TkZGcWlQRXFJc0JEa296b0g5djBqOXE3eWE5MUVZRmJ3UHdTNHFwZ0YwQlVyQ2JXNjJFL3ppTXUKMU9zblYwL3NwRHJ3S2tPNTFjV25BZFpndk03R3pmS1djU2tGVi9hRThxWjZ4UlhwZ21zVS9lWHczOXJhamdyUgo2NFZYM2xEQzd6OUFQMmhEUkczR051eWRzcmtYSGFxMldRYndXaTlZVEV4clJQcXVzOXZKMlVRTFBtTzVCeGdLCjRuQitBY0dkNzNlWVlzUFd5di9aVHF2dE5SUVhiRGNUTUE4ODhTOHIwbStwdHpBQ3dpS2dlT0k0dk5nK09YZzQKQkVuWjR1RXBpMVRHR2tEM0tKMDNZR3ZhWEJNcUNSTGIyZDZDeXdJREFRQUJBb0lCQUMzekZnZXlPL3NBRUlvYgoyY0VXeCtMQW1SNFdDQng4cC9lSUh0Y2ZuSlBjVUJSVDNCWlBBOGpwakl4R25vNVFGcVFoZGY2akZ4ME8vMHQ4CkdRVi9VOEVBeDRZb004QUdvNW83ODRHeE5wdUhTNDBad1RwY3Y4SFQ1d0wwQXR5ZlJvRXl3SlJCQUpnaXAzRHEKOVluMDRXYlh5WS9TZlRQMENKVWhOZzR0RmNWbmdWVitJQlNSZjliLzllVjQvYkNVWldhaUphalExQ3didzBVRQpaTjlzVlR1TERWRWs3Y1luTjlpWFpoeXFWbnIwdWUxWUZTRjBIMkgwR28rRnlPUUtLMnZsc3Zjd1JZK0oyUGVKCmZ2Wnk1R2xDaE9mQnc1QWtleGU3MWJ0VDF3elc4RGhMb3dPZFg0eTBMQmpkZWg3bmEyUUVnZDBEZWhaem54aUgKR0Vxa2VqVUNnWUVBMnhnTzZCTm9PMFlwZWllY25nb1NMUDNXY28zYk1WVnlGSXhYTE5XOTY0QStKUHI0RndJVQpvWGxMVmk3VUVhYUFQaFdrLzJNb3hUcjV0OGlDQnNGeXFsYmFMMGVXOXREL0plbDdEaUIxcUFkUFRDVWdZbDZECkdTbzVaVDFONHpEQ1hDWUs3MkFGZzJZVGprR0lSdnVwOUx3Tk0yL29pb09mVkF1amxqNGdUVmNDZ1lFQTBsQnIKYzYwYm9QMWNKUUdWV1hyUG1uVFd2eUZlS1BSOG5OanRPOVNYL0xDZndzdStsVkpVaVJEZFBSOTZnZnhISTlpMgo3QnNYSkhHUFdFaUtZRkwzSWhmNFBJWml5Qk9YR05SU2NxS1VaNEVkVkVyWHRXMFNUNnhpcStNRGkrejFjMjJMCjhXbUd6Kzc2a0swYWpvMkNVenRSQzFoVjJaTVFxclVyditheFdhMENnWUF0VUsyTW5LNzdTNGk2cGtURGYwdkIKR0lOcFVDUGM4VkpXSTZ6SUxqRkk2MDV2TWFWc2hOYWxpMFBrd0d6R2RjeWlpckdFelFxYXVKYjd4ekgxbWI5UQpzZ1FRc1ZydEU4OGlGVWVKWlhkUVdLcXpFaDYvbWRLOXVya0NVb3F3aWQ0NVZ2aitCN3M4TVRtc082dW5HdGhOCk1UUDl4cEN2VFlmL3h5Ui9wN3Znb3dLQmdDZVZpVlBoWGhUait1YmdNR3NDQ1hjSnpLMTJxMUZNQ3ZRK2hCQkIKeUVXQVBPR2VGWVhuVkEva1E2L1FiKzl0T3pxTS9JamQ1SEl3aVlsVlJlNHhUMkIwWUgyTDBhWFV3aGlqUmMxYgp1bERzNVVkTE91UmozaEZ1NGJkMlorRjdQUXQzcitKRk9XR0RtbGVHclR2dGVIMFA2Z1lYbnpqdlREREZIckhrCnlyYVZBb0dBUnpiSnE1SWlxazFlYmhEZXBwcWhQdjMzL2ZrODF3U0daZzZOR3Bha2F3WVl0ZmZNRlcxYnpXcm0KY2lSbTRmcEhQdG0zbHFoaW1pTzAxT1dIcUk5eThEaS8vQzY5d05GbjR5dXQ5QkFYTEVOeEJFOWJlOFRMdnBCbQpvcnovUEtBdUsxbHROQ25va093cjZSS2ZLdGJNM0hGUmhUYlRDWHRKVi9EeDkzWE5lYVk9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg=="
 
 APP_NAME = "Signal快传"
-APP_VERSION = "1.9.0"
+APP_VERSION = "1.10.0"
 
 RELEASE_NOTES = [
+    ("1.10.0", [
+        "设备发现互通：双网卡电脑（如有线+热点同时开）也能被对方自动发现，多数场景无需再手动添加",
+    ]),
     ("1.9.0", [
         "断点续传：网络中断后保留半成品，重新发送同名文件自动续传",
         "单个大文件自动分段多连接并行，速度再提速",
@@ -390,16 +393,18 @@ class Device(object):
 class DiscoveryService(threading.Thread):
     """UDP 广播发现：每 2.5s 广播一次，同时监听其他设备的广播。"""
 
-    def __init__(self, my_id, my_name, my_tcp, my_tls=0):
+    def __init__(self, my_id, my_name, my_tcp, my_tls=0, port=None):
         threading.Thread.__init__(self)
         self.daemon = True
         self.my_id = my_id
         self.my_name = my_name
         self.my_tcp = my_tcp
         self.my_tls = my_tls
+        self._port = port or DISCOVER_PORT
         self.devices = {}            # id -> Device（GIL 下读写安全）
         self.lock = threading.Lock()
         self._stop = threading.Event()
+        self._sock = None
 
     def set_name(self, name):
         self.my_name = name
@@ -407,18 +412,35 @@ class DiscoveryService(threading.Thread):
     def stop(self):
         self._stop.set()
 
-    def _payload(self):
+    def _payload(self, t="d"):
         return (MAGIC + json.dumps({
             "id": self.my_id, "name": self.my_name,
             "tcp": self.my_tcp, "tls": self.my_tls, "ip": get_local_ip(),
+            "t": t,
         }, ensure_ascii=False)).encode("utf-8")
+
+    def _reply(self, addr):
+        """广播回执：收到对方发现包后向其单播回发自己的信息。
+        不绑定源地址，由系统按目标路由自动选网卡——双网卡主机（如
+        有线+移动热点同时开启）的广播只会从默认路由网卡发出，热点
+        网段的对端收不到；有了回执，对方广播一次即可反向发现本机，
+        无需手动添加。回执包仅几百字节且随广播周期（2.5s）出现，
+        流量可忽略，不做节流以保证发现速度。"""
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.sendto(self._payload("r"), addr)
+            s.close()
+        except Exception:
+            pass
 
     def run(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._sock = sock
         try:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(("", DISCOVER_PORT))
+            sock.bind(("", self._port))
         except Exception:
+            sock.close()
             return
         last_send = 0.0
         while not self._stop.is_set():
@@ -432,11 +454,11 @@ class DiscoveryService(threading.Thread):
                         s2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                         s2.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
                         s2.bind((get_local_ip(), 0))
-                        s2.sendto(pkt, ("255.255.255.255", DISCOVER_PORT))
+                        s2.sendto(pkt, ("255.255.255.255", self._port))
                         s2.close()
                     except Exception:
                         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-                        sock.sendto(pkt, ("255.255.255.255", DISCOVER_PORT))
+                        sock.sendto(pkt, ("255.255.255.255", self._port))
                 except Exception:
                     pass
             sock.settimeout(1.0)
@@ -453,6 +475,7 @@ class DiscoveryService(threading.Thread):
                 did = info.get("id")
                 if not did or did == self.my_id:
                     continue
+                ptype = info.get("t", "d")   # 旧版本报文无类型字段，视为发现广播
                 with self.lock:
                     old = self.devices.get(did)
                     if old is None:
@@ -468,6 +491,9 @@ class DiscoveryService(threading.Thread):
                         old.tcp = int(info.get("tcp") or old.tcp)
                         old.tls = int(info.get("tls") or 0)
                         old.last_seen = now
+                if ptype == "d":
+                    # 只对发现包回执；回执包（t=r）不再回执，避免乒乓风暴
+                    self._reply(addr)
             except Exception:
                 continue
 
@@ -603,9 +629,16 @@ class TransferServer(threading.Thread):
         self._bind_udp()
 
     def _bind_udp(self):
+        # SO_EXCLUSIVEADDRUSE：确定性占用端口，同机多实例（测试/双开）时
+        # 自动递增避让，保证信令单播投递确定；真实双机无感知。
+        excl = getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
         for p in range(UDP_CTRL_PORT, UDP_CTRL_PORT + 10):
+            if p == DISCOVER_PORT:
+                continue   # 避开发现广播端口
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                if excl is not None:
+                    s.setsockopt(socket.SOL_SOCKET, excl, 1)
                 s.bind(("0.0.0.0", p))
                 s.settimeout(0.5)
                 self._udp_sock = s
