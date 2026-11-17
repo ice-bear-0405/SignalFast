@@ -399,6 +399,84 @@ def main():
     c9.stop()
     report("回执不触发回执（无乒乓）", no_pingpong)
 
+    # 9g. 手机网页互传：token 校验 / 上传落盘 / 共享下载
+    import json as _j2
+    import urllib.request as _u2
+    import web as core_web
+    web_upds = []
+    ws = core_web.WebShareServer(a.cfg, {
+        "on_recv_update": lambda mid, info: web_upds.append(("update", mid, info)),
+        "on_recv_done": lambda mid, ok, note: web_upds.append(("done", mid, ok, note)),
+    })
+    ws.start()
+    for _ in range(50):        # 等待线程内绑定完成（实测约 0.5~1s）
+        if ws.port > 0:
+            break
+        time.sleep(0.1)
+    time.sleep(0.2)
+    base = "http://127.0.0.1:%d" % ws.port
+
+    def _get(path):
+        try:
+            r = _u2.urlopen(base + path, timeout=5)
+            return r.getcode(), r.read()
+        except Exception as e:
+            code = getattr(e, "code", None)
+            return code, (e.read() if hasattr(e, "read") else str(e).encode())
+
+    c_no, _ = _get("/?t=wrongtoken")
+    c_bad, _ = _get("/list")
+    c_ok, page = _get("/?t=" + ws.token)
+    report("网页服务 token 校验", c_no == 403 and c_bad == 403 and c_ok == 200
+           and "手机互传".encode() in page,
+           "no=%s bad=%s ok=%s" % (c_no, c_bad, c_ok))
+
+    # 上传两个文件（含中文文件名），MD5 对照
+    d1 = os.urandom(256 * 1024)
+    d2 = "网页上传中文内容测试 ✓\n".encode("utf-8") * 100
+    mp = (b"--BNDBND\r\n"
+          b'Content-Disposition: form-data; name="file"; filename="web A.bin"\r\n'
+          b"Content-Type: application/octet-stream\r\n\r\n") + d1 + \
+         (b"\r\n--BNDBND\r\n"
+          b'Content-Disposition: form-data; name="file"; filename="\xe4\xb8\xad\xe6\x96\x87 \xe4\xb8\x8a\xe4\xbc\xa0.txt"\r\n\r\n') + d2 + \
+         b"\r\n--BNDBND--\r\n"
+    req = _u2.Request(base + "/up?t=" + ws.token, data=mp, method="POST")
+    req.add_header("Content-Type", "multipart/form-data; boundary=BNDBND")
+    r = _u2.urlopen(req, timeout=10)
+    resp = _j2.loads(r.read().decode("utf-8"))
+    f1 = os.path.join(a.save_dir, "web A.bin")
+    f2 = os.path.join(a.save_dir, "中文 上传.txt")
+    ok_up = (resp.get("ok") and len(resp.get("files") or []) == 2
+             and os.path.isfile(f1) and os.path.isfile(f2)
+             and hashlib.md5(open(f1, "rb").read()).hexdigest() == hashlib.md5(d1).hexdigest()
+             and open(f2, "rb").read() == d2)
+    report("网页上传落盘 + MD5（含中文文件名）", ok_up,
+           str(resp.get("files"))[:120])
+    report("网页上传回调到任务列表", any(x[0] == "done" and x[2] for x in web_upds),
+           str(web_upds)[:120])
+
+    # 重名再次上传 → 自动改名 (1)
+    req2 = _u2.Request(base + "/up?t=" + ws.token, data=mp, method="POST")
+    req2.add_header("Content-Type", "multipart/form-data; boundary=BNDBND")
+    _u2.urlopen(req2, timeout=10)
+    f1b = os.path.join(a.save_dir, "web A (1).bin")
+    report("网页上传重名自动改名", os.path.isfile(f1b))
+
+    # 共享 + 下载
+    ws.add_shared([f1, f2])
+    c_l, lb = _get("/list?t=" + ws.token)
+    lst = _j2.loads(lb.decode("utf-8"))
+    c_d, db = _get("/dl?t=" + ws.token + "&i=0")
+    ok_dl = (c_l == 200 and len(lst.get("files")) == 2
+             and c_d == 200 and db == d1)
+    report("网页共享清单 + 下载内容一致", ok_dl,
+           "list=%s dl=%s len=%d" % (c_l, c_d, len(db)))
+    c_x, _ = _get("/dl?t=" + ws.token + "&i=99")
+    report("越界下载返回 404", c_x == 404)
+
+    ws.stop()
+    time.sleep(0.3)
+
     # 10. 大小格式化
     report("fmt_size", core.fmt_size(110 * 1024 * 1024) == "110.0 MB",
            core.fmt_size(110 * 1024 * 1024))

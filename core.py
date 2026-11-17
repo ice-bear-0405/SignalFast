@@ -27,9 +27,15 @@ CERT_B64 = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN6ekNDQWJlZ0F3SUJBZ0lVR3FT
 KEY_B64 = "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBcy82UHRSYWlLdk9qRjdNL0FLaVRPUThFTGhyNnVLZFh6MWZJT3VyVGNTRVNzMUR0CmdzWmlUM013TkZGcWlQRXFJc0JEa296b0g5djBqOXE3eWE5MUVZRmJ3UHdTNHFwZ0YwQlVyQ2JXNjJFL3ppTXUKMU9zblYwL3NwRHJ3S2tPNTFjV25BZFpndk03R3pmS1djU2tGVi9hRThxWjZ4UlhwZ21zVS9lWHczOXJhamdyUgo2NFZYM2xEQzd6OUFQMmhEUkczR051eWRzcmtYSGFxMldRYndXaTlZVEV4clJQcXVzOXZKMlVRTFBtTzVCeGdLCjRuQitBY0dkNzNlWVlzUFd5di9aVHF2dE5SUVhiRGNUTUE4ODhTOHIwbStwdHpBQ3dpS2dlT0k0dk5nK09YZzQKQkVuWjR1RXBpMVRHR2tEM0tKMDNZR3ZhWEJNcUNSTGIyZDZDeXdJREFRQUJBb0lCQUMzekZnZXlPL3NBRUlvYgoyY0VXeCtMQW1SNFdDQng4cC9lSUh0Y2ZuSlBjVUJSVDNCWlBBOGpwakl4R25vNVFGcVFoZGY2akZ4ME8vMHQ4CkdRVi9VOEVBeDRZb004QUdvNW83ODRHeE5wdUhTNDBad1RwY3Y4SFQ1d0wwQXR5ZlJvRXl3SlJCQUpnaXAzRHEKOVluMDRXYlh5WS9TZlRQMENKVWhOZzR0RmNWbmdWVitJQlNSZjliLzllVjQvYkNVWldhaUphalExQ3didzBVRQpaTjlzVlR1TERWRWs3Y1luTjlpWFpoeXFWbnIwdWUxWUZTRjBIMkgwR28rRnlPUUtLMnZsc3Zjd1JZK0oyUGVKCmZ2Wnk1R2xDaE9mQnc1QWtleGU3MWJ0VDF3elc4RGhMb3dPZFg0eTBMQmpkZWg3bmEyUUVnZDBEZWhaem54aUgKR0Vxa2VqVUNnWUVBMnhnTzZCTm9PMFlwZWllY25nb1NMUDNXY28zYk1WVnlGSXhYTE5XOTY0QStKUHI0RndJVQpvWGxMVmk3VUVhYUFQaFdrLzJNb3hUcjV0OGlDQnNGeXFsYmFMMGVXOXREL0plbDdEaUIxcUFkUFRDVWdZbDZECkdTbzVaVDFONHpEQ1hDWUs3MkFGZzJZVGprR0lSdnVwOUx3Tk0yL29pb09mVkF1amxqNGdUVmNDZ1lFQTBsQnIKYzYwYm9QMWNKUUdWV1hyUG1uVFd2eUZlS1BSOG5OanRPOVNYL0xDZndzdStsVkpVaVJEZFBSOTZnZnhISTlpMgo3QnNYSkhHUFdFaUtZRkwzSWhmNFBJWml5Qk9YR05SU2NxS1VaNEVkVkVyWHRXMFNUNnhpcStNRGkrejFjMjJMCjhXbUd6Kzc2a0swYWpvMkNVenRSQzFoVjJaTVFxclVyditheFdhMENnWUF0VUsyTW5LNzdTNGk2cGtURGYwdkIKR0lOcFVDUGM4VkpXSTZ6SUxqRkk2MDV2TWFWc2hOYWxpMFBrd0d6R2RjeWlpckdFelFxYXVKYjd4ekgxbWI5UQpzZ1FRc1ZydEU4OGlGVWVKWlhkUVdLcXpFaDYvbWRLOXVya0NVb3F3aWQ0NVZ2aitCN3M4TVRtc082dW5HdGhOCk1UUDl4cEN2VFlmL3h5Ui9wN3Znb3dLQmdDZVZpVlBoWGhUait1YmdNR3NDQ1hjSnpLMTJxMUZNQ3ZRK2hCQkIKeUVXQVBPR2VGWVhuVkEva1E2L1FiKzl0T3pxTS9JamQ1SEl3aVlsVlJlNHhUMkIwWUgyTDBhWFV3aGlqUmMxYgp1bERzNVVkTE91UmozaEZ1NGJkMlorRjdQUXQzcitKRk9XR0RtbGVHclR2dGVIMFA2Z1lYbnpqdlREREZIckhrCnlyYVZBb0dBUnpiSnE1SWlxazFlYmhEZXBwcWhQdjMzL2ZrODF3U0daZzZOR3Bha2F3WVl0ZmZNRlcxYnpXcm0KY2lSbTRmcEhQdG0zbHFoaW1pTzAxT1dIcUk5eThEaS8vQzY5d05GbjR5dXQ5QkFYTEVOeEJFOWJlOFRMdnBCbQpvcnovUEtBdUsxbHROQ25va093cjZSS2ZLdGJNM0hGUmhUYlRDWHRKVi9EeDkzWE5lYVk9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg=="
 
 APP_NAME = "Signal快传"
-APP_VERSION = "1.10.0"
+APP_VERSION = "1.11.0"
 
 RELEASE_NOTES = [
+    ("1.11.0", [
+        "手机网页互传：电脑内置网页服务，手机扫码即可互传文件（无需安装 APP）",
+        "手机上传文件自动存入接收目录，电脑可将文件共享给手机下载",
+        "访问令牌保护：二维码内含随机令牌，局域网内其他设备无法访问",
+        "多网卡多二维码：网线+热点同时开时，每个网段一个二维码任扫",
+    ]),
     ("1.10.0", [
         "设备发现互通：双网卡电脑（如有线+热点同时开）也能被对方自动发现，多数场景无需再手动添加",
         "修复接收确认弹窗出现约 250ms 后必闪退的问题（v1.9 引入，弹窗自动关闭轮询的类型错误）",
@@ -348,6 +354,7 @@ class Config(object):
         "save_dir": "",
         "auto_accept": False,
         "autostart": False,
+        "web_enabled": True,
     }
 
     def __init__(self):
@@ -363,6 +370,7 @@ class Config(object):
         self.save_dir = data["save_dir"] or ""
         self.auto_accept = bool(data["auto_accept"])
         self.autostart = bool(data["autostart"])
+        self.web_enabled = bool(data["web_enabled"])
 
     def save_dir_ok(self):
         """保存目录是否已设置且真实存在"""
@@ -375,6 +383,7 @@ class Config(object):
                 "save_dir": self.save_dir,
                 "auto_accept": self.auto_accept,
                 "autostart": self.autostart,
+                "web_enabled": self.web_enabled,
             }, f, ensure_ascii=False, indent=2)
 
 

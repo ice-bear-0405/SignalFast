@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QCheckBox,
 
 import core
 import hotspot
+import web as _web
 
 # ---------------------------------------------------------------- 全局样式
 
@@ -272,6 +273,131 @@ class HistoryDialog(QDialog):
                 pass
 
 
+class WebShareDialog(QDialog):
+    """手机网页互传：扫码进入 + 共享文件清单管理"""
+
+    def __init__(self, parent):
+        QDialog.__init__(self, parent)
+        self.setWindowTitle("📱 手机互传")
+        self.resize(640, 660)
+        mw = parent
+        v = QVBoxLayout(self)
+        tip = QLabel("手机连接同一网络（Wi-Fi / 本机热点）后，用相机或浏览器扫码进入。\n"
+                     "手机可上传文件到电脑接收目录，也可下载下方共享的文件。")
+        tip.setWordWrap(True)
+        v.addWidget(tip)
+        self.qr_row = QHBoxLayout()
+        v.addLayout(self.qr_row)
+        self.url_hint = QLabel("")
+        self.url_hint.setObjectName("hint")
+        self.url_hint.setWordWrap(True)
+        v.addWidget(self.url_hint)
+        v.addWidget(QLabel("电脑 → 手机：共享给手机的文件（手机页面可下载）"))
+        self.shared_list = QListWidget()
+        self.shared_list.setObjectName("devList")
+        v.addWidget(self.shared_list, 1)
+        row = QHBoxLayout()
+        btn_add = QPushButton("➕ 添加文件")
+        btn_remove = QPushButton("移除所选")
+        btn_clear = QPushButton("清空")
+        btn_add.clicked.connect(self.add_files)
+        btn_remove.clicked.connect(self.remove_sel)
+        btn_clear.clicked.connect(self.clear_all)
+        row.addWidget(btn_add)
+        row.addWidget(btn_remove)
+        row.addWidget(btn_clear)
+        row.addStretch(1)
+        v.addLayout(row)
+        hint = QLabel("提示：手机端地址含随机令牌，局域网内其他设备无法访问；\n"
+                      "热点互传时请扫热点网卡对应的二维码。")
+        hint.setObjectName("hint")
+        hint.setWordWrap(True)
+        v.addWidget(hint)
+        self.rebuild_qr()
+        self.refresh_list()
+
+    def _qr_pixmap(self, text, cell=4):
+        try:
+            import qrcode
+            qr = qrcode.QRCode(border=2)
+            qr.add_data(text)
+            qr.make(fit=True)
+            m = qr.get_matrix()
+            n = len(m)
+            pm = QPixmap(n * cell, n * cell)
+            pm.fill(QColor("#ffffff"))
+            p = QPainter(pm)
+            p.setPen(Qt.NoPen)
+            p.setBrush(QColor("#111111"))
+            for y in range(n):
+                for x in range(n):
+                    if m[y][x]:
+                        p.drawRect(x * cell, y * cell, cell, cell)
+            p.end()
+            return pm
+        except Exception as e:
+            core.log.warning("二维码生成失败：%s", e)
+            return None
+
+    def rebuild_qr(self):
+        mw = self.parent()
+        while self.qr_row.count():
+            item = self.qr_row.takeAt(0)
+            w = item.widget()
+            if w:
+                w.deleteLater()
+        ips = _web.local_ips()
+        urls = []
+        for ip in ips[:3]:   # 最多画 3 个（多网卡场景逐个给出）
+            url = mw.web.url_for(ip)
+            urls.append((ip, url))
+        if not urls:
+            self.url_hint.setText("未获取到本机 IP")
+            return
+        for ip, url in urls:
+            box = QVBoxLayout()
+            pm = self._qr_pixmap(url)
+            if pm:
+                lb = QLabel()
+                lb.setPixmap(pm)
+                lb.setAlignment(Qt.AlignCenter)
+                box.addWidget(lb)
+            cap = QLabel(ip)
+            cap.setObjectName("hint")
+            cap.setAlignment(Qt.AlignCenter)
+            box.addWidget(cap)
+            holder = QWidget()
+            holder.setLayout(box)
+            self.qr_row.addWidget(holder)
+        self.url_hint.setText("地址：" + "    ".join(u for _, u in urls))
+
+    def refresh_list(self):
+        mw = self.parent()
+        self.shared_list.clear()
+        for i, x in enumerate(mw.web.shared):
+            self.shared_list.addItem(QListWidgetItem(
+                "%s（%s，%s 添加）" % (x["name"], core.fmt_size(x["size"]), x["added"])))
+
+    def add_files(self):
+        paths, _ = QFileDialog.getOpenFileNames(self, "选择要共享给手机的文件")
+        if not paths:
+            return
+        mw = self.parent()
+        mw.web.add_shared(paths)
+        self.refresh_list()
+
+    def remove_sel(self):
+        mw = self.parent()
+        for item in self.shared_list.selectedItems():
+            mw.web.remove_shared(self.shared_list.row(item))
+        self.refresh_list()
+
+    def clear_all(self):
+        mw = self.parent()
+        mw.web.clear_shared()
+        self.refresh_list()
+
+
 class SettingsDialog(QDialog):
     def __init__(self, parent):
         QDialog.__init__(self, parent)
@@ -300,6 +426,9 @@ class SettingsDialog(QDialog):
         self.auto_chk = QCheckBox("自动接收文件（不再弹窗确认）")
         self.auto_chk.setChecked(cfg.auto_accept)
         v.addWidget(self.auto_chk)
+        self.web_chk = QCheckBox("手机网页互传（手机浏览器扫码收发，局域网）")
+        self.web_chk.setChecked(cfg.web_enabled)
+        v.addWidget(self.web_chk)
         self.startup_chk = QCheckBox("开机自动运行")
         self.startup_chk.setChecked(cfg.autostart)
         v.addWidget(self.startup_chk)
@@ -390,6 +519,15 @@ class SettingsDialog(QDialog):
         cfg.save_dir = d
         cfg.auto_accept = self.auto_chk.isChecked()
         cfg.autostart = self.startup_chk.isChecked()
+        cfg.web_enabled = self.web_chk.isChecked()
+        if cfg.web_enabled and not mw.web.is_alive():
+            mw.web = _web.WebShareServer(cfg, {
+                "on_recv_update": mw._cb_update,
+                "on_recv_done": mw._cb_recv_done,
+            })
+            mw.web.start()
+        elif not cfg.web_enabled and mw.web.is_alive():
+            mw.web.stop()
         if cfg.autostart and not set_autostart(True):
             QMessageBox.warning(self, "提示", "开机自启设置失败，可忽略继续使用。")
         if not cfg.autostart:
@@ -463,6 +601,12 @@ class MainWindow(QMainWindow):
         self.discovery = core.DiscoveryService(self.my_id, self.config.device_name,
                                                self.server.port, self.server.tls_port)
         self.discovery.start()
+        self.web = _web.WebShareServer(self.config, {
+            "on_recv_update": self._cb_update,
+            "on_recv_done": self._cb_recv_done,
+        })
+        if self.config.web_enabled:
+            self.web.start()
 
         self._build_ui()
         self._build_tray()
@@ -509,10 +653,13 @@ class MainWindow(QMainWindow):
         self.header_info.setObjectName("hint")
         th.addWidget(self.header_info)
         th.addStretch(1)
+        btn_web = QPushButton("📱 手机互传")
+        btn_web.clicked.connect(self.open_web_share)
         btn_hotspot = QPushButton("📶 一键热点")
         btn_hotspot.clicked.connect(self.open_hotspot)
         btn_set = QPushButton("⚙ 设置")
         btn_set.clicked.connect(self.open_settings)
+        th.addWidget(btn_web)
         th.addWidget(btn_hotspot)
         th.addWidget(btn_set)
         root.addWidget(top)
@@ -1118,6 +1265,19 @@ class MainWindow(QMainWindow):
         dlg = HotspotDialog(self, self.refresh_header)
         dlg.exec_()
 
+    def open_web_share(self):
+        if not self.config.web_enabled:
+            QMessageBox.information(self, "未开启",
+                                    "手机网页互传已在设置中关闭。\n可在【设置】中重新开启。")
+            return
+        if not self.web.is_alive():
+            self.web = _web.WebShareServer(self.config, {
+                "on_recv_update": self._cb_update,
+                "on_recv_done": self._cb_recv_done,
+            })
+            self.web.start()
+        WebShareDialog(self).exec_()
+
     def open_settings(self):
         SettingsDialog(self).exec_()
 
@@ -1146,6 +1306,10 @@ class MainWindow(QMainWindow):
     def real_exit(self):
         self.discovery.stop()
         self.server.stop()
+        try:
+            self.web.stop()
+        except Exception:
+            pass
         self.tray.hide()
         QApplication.quit()
 

@@ -1,4 +1,5 @@
 # 界面依赖（传输核心 core.py 仅用 Python 标准库）
 PyQt5>=5.15
+qrcode>=7        # 手机网页互传的二维码（纯 Python，矩阵输出）
 
 # 打包 exe 需要：pip install pyinstaller
