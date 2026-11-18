@@ -780,9 +780,10 @@ class TransferServer(threading.Thread):
                 except Exception:
                     pass
                 return
-        self._handle(conn, addr)
+        self._handle_conn(conn, addr)   # 明文与 TLS 统一进入连接处理
 
-    def _handle(self, conn, addr):
+    def _handle_conn(self, conn, addr):
+        """单连接处理（方法名避开 3.13 threading.Thread 内部新增的 _handle 句柄属性）"""
         tmp_key = uuid.uuid4().hex[:8]
         ctrl = TransferControl()
         ctrl.attach(conn)
