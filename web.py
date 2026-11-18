@@ -208,6 +208,24 @@ loadList();setInterval(loadList,5000);
 </script></body></html>"""
 
 
+class _ExclusiveHTTPServer(ThreadingHTTPServer):
+    """确定性独占端口（Windows SO_EXCLUSIVEADDRUSE）：
+    禁用 http.server 默认的 SO_REUSEADDR，避免与运行中的其他实例
+    共享端口导致连接投递不确定（多实例场景测试/双开都会踩）。
+    端口被占时构造抛 OSError，调用方递增重试。"""
+
+    allow_reuse_address = False
+
+    def server_bind(self):
+        excl = getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
+        if excl is not None:
+            try:
+                self.socket.setsockopt(socket.SOL_SOCKET, excl, 1)
+            except OSError:
+                pass
+        ThreadingHTTPServer.server_bind(self)
+
+
 class _Handler(BaseHTTPRequestHandler):
     server_version = "SignalFastWeb/1.11"
     protocol_version = "HTTP/1.1"
@@ -451,7 +469,7 @@ class WebShareServer(threading.Thread):
         port = WEB_PORT_BASE
         for p in range(WEB_PORT_BASE, WEB_PORT_BASE + 10):
             try:
-                self.httpd = ThreadingHTTPServer(("0.0.0.0", p), _Handler)
+                self.httpd = _ExclusiveHTTPServer(("0.0.0.0", p), _Handler)
                 port = p
                 break
             except OSError:

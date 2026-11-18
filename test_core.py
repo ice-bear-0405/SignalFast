@@ -29,6 +29,7 @@ def make_cfg(save_dir, auto_accept=False):
     c.save_dir = save_dir
     os.makedirs(save_dir, exist_ok=True)
     c.auto_accept = auto_accept
+    c.web_enabled = True
     return c
 
 
@@ -475,6 +476,81 @@ def main():
     report("越界下载返回 404", c_x == 404)
 
     ws.stop()
+    time.sleep(0.3)
+
+    # 9h. MCP 接口：本地控制服务 + MCP 协议处理
+    import mcp as _mcp
+    web2 = core_web.WebShareServer(a.cfg, {})
+    web2.start()
+    for _ in range(50):
+        if web2.port > 0:
+            break
+        time.sleep(0.1)
+    mcp_upds = []
+    ctrl = _mcp.CtrlServer({
+        "config": a.cfg, "discovery": a.disc, "web": web2,
+        "progress": {},
+        "ui_cb": {"on_send_started": lambda *a2: mcp_upds.append(("row",) + a2)},
+    })
+    ctrl.start()
+    for _ in range(50):
+        if ctrl.port > 0:
+            break
+        time.sleep(0.1)
+    base_m = "http://127.0.0.1:%d" % ctrl.port
+
+    def _mget(path):
+        return _j2.loads(_u2.urlopen(base_m + path + ("&" if "?" in path else "?")
+                                     + "t=" + ctrl.token, timeout=5).read().decode("utf-8"))
+
+    # 令牌校验（X-Token 错误 → 403）
+    try:
+        _u2.urlopen(_u2.Request(base_m + "/status", headers={"X-Token": "wrong"}), timeout=5)
+        c403 = 200
+    except Exception as e:
+        c403 = getattr(e, "code", None)
+    st = _mget("/status")
+    report("MCP 控制服务令牌校验 + 状态", c403 == 403
+           and st.get("device_name") == a.cfg.device_name
+           and st.get("version") == core.APP_VERSION, "403=%s" % c403)
+    dv = _mget("/devices")
+    report("MCP 设备列表", any(d.get("name") == "电脑-乙" for d in dv.get("devices", [])),
+           str(dv)[:120])
+    # 共享管理（写操作）
+    f1_m = os.path.join(a.save_dir, "web A.bin")
+    pr = _j2.loads(_u2.urlopen(_u2.Request(
+        base_m + "/shared?t=" + ctrl.token,
+        data=_j2.dumps({"op": "add", "paths": [f1_m]}).encode("utf-8"),
+        headers={"Content-Type": "application/json; charset=utf-8"},
+        method="POST"), timeout=5).read().decode("utf-8"))
+    report("MCP 共享添加（存在性校验）", pr.get("ok") and pr.get("total") == 1, str(pr)[:120])
+    # 触发发送（文字）→ 接收端收到
+    pr2 = _j2.loads(_u2.urlopen(_u2.Request(
+        base_m + "/send?t=" + ctrl.token,
+        data=_j2.dumps({"device": "电脑-乙", "text": "来自 MCP 的文字消息 ✓"}).encode("utf-8"),
+        headers={"Content-Type": "application/json; charset=utf-8"},
+        method="POST"), timeout=5).read().decode("utf-8"))
+    mid_m = pr2.get("mid") or ""
+    time.sleep(1.5)
+    tk = _mget("/task?mid=" + mid_m)
+    report("MCP 触发发送文字 + 状态查询",
+           pr2.get("ok") and ("来自 MCP 的文字消息 ✓" in (b.texts[-1][1] if b.texts else ""))
+           and (tk.get("task") or {}).get("mid") == mid_m,
+           (str(pr2)[:80] + " | " + str(b.texts[-1]) + " | " + str(tk)[:80]) if b.texts else str(pr2))
+    report("MCP 发起后 UI 任务行回调", any(x[0] == "row" for x in mcp_upds))
+    # MCP 协议层（initialize / tools）
+    cli_m = _mcp.CtrlClient()
+    r_init = _mcp.mcp_handle({"jsonrpc": "2.0", "id": 1, "method": "initialize"}, cli_m)
+    r_tools = _mcp.mcp_handle({"jsonrpc": "2.0", "id": 2, "method": "tools/list"}, cli_m)
+    r_call = _mcp.mcp_handle({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+                              "params": {"name": "app_status", "arguments": {}}}, cli_m)
+    report("MCP 协议 initialize/tools/list/call",
+           r_init["result"]["protocolVersion"] == _mcp.MCP_PROTOCOL_VERSION
+           and len(r_tools["result"]["tools"]) == 8
+           and not r_call["result"]["isError"]
+           and "Signal" in r_call["result"]["content"][0]["text"])
+    ctrl.stop()
+    web2.stop()
     time.sleep(0.3)
 
     # 10. 大小格式化

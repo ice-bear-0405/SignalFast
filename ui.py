@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QCheckBox,
 
 import core
 import hotspot
+import mcp as _mcp
 import web as _web
 
 # ---------------------------------------------------------------- 全局样式
@@ -116,6 +117,7 @@ class Bridge(QObject):
     recv_update = pyqtSignal(str, dict)        # msg_id, info
     recv_done = pyqtSignal(str, bool, str)     # msg_id, ok, note
     need_setup = pyqtSignal()                  # 未设置保存目录，引导设置
+    task_started = pyqtSignal(str, str, str, str, bool)   # MCP 发起：mid/direction/peer/content/has_ops
 
 
 # ---------------------------------------------------------------- 接收确认
@@ -449,6 +451,25 @@ class SettingsDialog(QDialog):
         fw_hint.setObjectName("hint")
         fw_hint.setWordWrap(True)
         v.addWidget(fw_hint)
+        mcp_sep = QLabel("—")
+        mcp_sep.setObjectName("hint")
+        v.addWidget(mcp_sep)
+        self.mcp_status = QLabel("🤖 MCP 接口：启动中…")
+        self.mcp_status.setObjectName("hint")
+        self.mcp_status.setWordWrap(True)
+        v.addWidget(self.mcp_status)
+        mcp_row = QHBoxLayout()
+        btn_mcp = QPushButton("📋 复制 MCP 配置")
+        btn_mcp.clicked.connect(self.copy_mcp_config)
+        mcp_row.addWidget(btn_mcp)
+        mcp_row.addStretch(1)
+        v.addLayout(mcp_row)
+        try:
+            if parent.ctrl and parent.ctrl.port:
+                self.mcp_status.setText("🤖 MCP 接口：127.0.0.1:%d 运行中（AI 助手可接入，仅限本机）"
+                                        % parent.ctrl.port)
+        except Exception:
+            pass
         rv.addWidget(QLabel("📋 关于 Signal 快传"))
         ver_lb = QLabel("当前版本：v%s" % core.APP_VERSION)
         ver_lb.setObjectName("hint")
@@ -492,6 +513,25 @@ class SettingsDialog(QDialog):
         else:
             QMessageBox.warning(self, "未执行", "命令未成功启动（可能取消了 UAC）。\n"
                                 "也可手动以管理员身份运行命令提示符执行 netsh 命令。")
+
+    def copy_mcp_config(self):
+        import json as _json
+        mw = self.parent()
+        if not (getattr(mw, "ctrl", None) and mw.ctrl.port):
+            QMessageBox.warning(self, "未运行", "MCP 接口未就绪，请重启软件后重试。")
+            return
+        if getattr(sys, "frozen", False):
+            cmd = os.path.join(os.path.dirname(sys.executable), "SignalMCP.exe")
+            cfg_json = {"mcpServers": {"signal-fast": {"command": cmd, "args": []}}}
+        else:
+            cmd = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mcp.py")
+            cfg_json = {"mcpServers": {"signal-fast": {
+                "command": sys.executable, "args": [cmd]}}}
+        QApplication.clipboard().setText(_json.dumps(cfg_json, ensure_ascii=False, indent=1))
+        QMessageBox.information(
+            self, "已复制",
+            "MCP 配置已复制到剪贴板：\n%s\n\n粘贴到 AI 助手（如 TeleAgent）的 MCP 服务器设置中即可接入。\n"
+            "接入后 AI 可查询设备/历史、管理共享，并触发发送（接收端仍需人工确认）。" % _json.dumps(cfg_json, ensure_ascii=False))
 
     def show_history(self):
         dlg = HistoryDialog(self)
@@ -607,6 +647,22 @@ class MainWindow(QMainWindow):
         })
         if self.config.web_enabled:
             self.web.start()
+        self.ctrl = _mcp.CtrlServer({
+            "config": self.config, "discovery": self.discovery,
+            "web": self.web, "progress": self.progress,
+            "ui_cb": {"on_send_started":
+                      lambda mid, d, p, c: self.bridge.task_started.emit(
+                          mid, d, p, c, True)},
+        })
+        self.ctrl.start()
+        self.ctrl = _mcp.CtrlServer({
+            "config": self.config, "discovery": self.discovery,
+            "web": self.web, "progress": self.progress,
+            "ui_cb": {"on_send_started":
+                      lambda mid, d, p, c: self.bridge.task_started.emit(
+                          mid, d, p, c, True)},
+        })
+        self.ctrl.start()
 
         self._build_ui()
         self._build_tray()
@@ -621,6 +677,8 @@ class MainWindow(QMainWindow):
         self.bridge.recv_update.connect(self._ui_recv_update)
         self.bridge.recv_done.connect(self._ui_recv_done)
         self.bridge.need_setup.connect(self._ui_need_setup)
+        self.bridge.task_started.connect(self._ui_task_started)
+        self.bridge.task_started.connect(self._ui_task_started)
 
         # 首次使用：未设置保存目录则自动弹出设置窗口引导用户选择
         if not self.config.save_dir_ok():
@@ -1251,6 +1309,10 @@ class MainWindow(QMainWindow):
         self.refresh_progress()
         self.tray.showMessage("Signal 快传", note,
                               QSystemTrayIcon.Information if ok else QSystemTrayIcon.Warning, 4000)
+
+    def _ui_task_started(self, mid, direction, peer, content, has_ops):
+        """MCP 触发的发送：在任务表中建行（与手动发送一致）"""
+        self._add_task_row(mid, direction, peer, content, has_ops=has_ops)
 
     def _ui_need_setup(self):
         """对方发文件过来但本地未设置保存目录：提示并自动打开设置"""
