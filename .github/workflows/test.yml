@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  PYTHONIOENCODING: utf-8   # Windows runner 控制台默认编码无法编中 PASS/FAIL 符号，强制 UTF-8
+
 jobs:
   test:
     runs-on: windows-latest
@@ -25,7 +28,7 @@ jobs:
       - name: Run core tests
         shell: pwsh
         run: |
-          python test_core.py 2>&1 | Tee-Object -Variable out
+          python -X utf8 test_core.py 2>&1 | Tee-Object -Variable out
           ($out | Select-String '\[FAIL\]') | ForEach-Object { "::error::$($_.Line)" }
           exit $LASTEXITCODE
 
@@ -34,6 +37,6 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         shell: pwsh
         run: |
-          python smoke_ui.py 2>&1 | Tee-Object -Variable out
+          python -X utf8 smoke_ui.py 2>&1 | Tee-Object -Variable out
           ($out | Select-String 'Traceback|Error') | ForEach-Object { "::error::$($_.Line)" }
           exit $LASTEXITCODE
