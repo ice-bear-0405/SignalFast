@@ -40,3 +40,4 @@ jobs:
           python -X utf8 smoke_ui.py 2>&1 | Tee-Object -Variable out
           ($out | Select-String 'Traceback|Error') | ForEach-Object { "::error::$($_.Line)" }
           exit $LASTEXITCODE
+# rerun check
