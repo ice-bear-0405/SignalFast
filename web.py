@@ -198,8 +198,13 @@ function loadList(){
   if(!r.files.length){ul.innerHTML='<li class="empty">暂无共享文件：在电脑上点【手机互传】添加</li>';return}
   r.files.forEach(function(f){
    var li=document.createElement('li');
-   li.innerHTML='<span class="name">'+f.name+'<span class="size">'+fmt(f.size)+'</span></span>'+
-    '<a class="dl" href="/dl?t='+T+'&i='+f.i+'" download="'+f.name+'">下载</a>';
+   var nm=document.createElement('span');nm.className='name';
+   nm.textContent=f.name;
+   var sz=document.createElement('span');sz.className='size';sz.textContent=fmt(f.size);
+   nm.appendChild(sz);
+   var a=document.createElement('a');a.className='dl';
+   a.href='/dl?t='+T+'&i='+f.i;a.setAttribute('download',f.name);a.textContent='下载';
+   li.appendChild(nm);li.appendChild(a);
    ul.appendChild(li);
   });
  }).catch(function(){document.getElementById('list').innerHTML='<li class="empty">连接失败</li>'});

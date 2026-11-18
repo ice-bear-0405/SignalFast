@@ -45,18 +45,18 @@ from core import Device
 import time
 now = time.time()
 with win.discovery.lock:
-    win.discovery.devices["fake1"] = Device("fake1", "工位-互联网机", "192.168.1.23", 54546, 54566, now + 999)
-    win.discovery.devices["fake2"] = Device("fake2", "工位-内网机", "10.20.30.44", 54547, 54567, now + 999)
+    win.discovery.devices["fake1"] = Device("fake1", "演示-电脑A", "192.168.1.23", 54546, 54566, now + 999)
+    win.discovery.devices["fake2"] = Device("fake2", "演示-电脑B", "10.20.30.44", 54547, 54567, now + 999)
 win.refresh_devices()
 app.processEvents()
 
 # 塞两条传输任务（一条进行中，一条完成）
-win._add_task_row("demo1", "↑ 发送", "工位-内网机", "项目方案.pptx；合同扫描件.pdf")
+win._add_task_row("demo1", "↑ 发送", "演示-电脑B", "项目方案.pptx；合同扫描件.pdf")
 win.progress["demo1"] = {"direction": "send", "sender": "本机", "total": 100 * 1024 * 1024,
                          "sent": 62 * 1024 * 1024, "speed": 112 * 1024 * 1024,
                          "state": "发送中", "files": []}
-win._add_task_row("demo2", "↓ 接收", "工位-互联网机", "照片.zip")
-win.progress["demo2"] = {"direction": "recv", "sender": "工位-互联网机", "total": 10 * 1024 * 1024,
+win._add_task_row("demo2", "↓ 接收", "演示-电脑A", "照片.zip")
+win.progress["demo2"] = {"direction": "recv", "sender": "演示-电脑A", "total": 10 * 1024 * 1024,
                          "sent": 10 * 1024 * 1024, "speed": 0.0,
                          "state": "✅ 全部接收完成，共 1 个文件，MD5 校验通过", "files": []}
 win.refresh_progress()
