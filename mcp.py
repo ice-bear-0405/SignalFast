@@ -59,7 +59,7 @@ class _ExclusiveHTTPServer(ThreadingHTTPServer):
 
 
 class _CtrlHandler(BaseHTTPRequestHandler):
-    server_version = "SignalFastCtrl/1.12"
+    server_version = "SignalFastCtrl/1.13"
     protocol_version = "HTTP/1.1"
 
     def log_message(self, fmt, *args):

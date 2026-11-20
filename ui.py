@@ -23,6 +23,7 @@ from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QCheckBox,
 import core
 import hotspot
 import mcp as _mcp
+import singleinstance
 import web as _web
 
 # ---------------------------------------------------------------- 全局样式
@@ -678,7 +679,12 @@ class MainWindow(QMainWindow):
         self.bridge.recv_done.connect(self._ui_recv_done)
         self.bridge.need_setup.connect(self._ui_need_setup)
         self.bridge.task_started.connect(self._ui_task_started)
-        self.bridge.task_started.connect(self._ui_task_started)
+
+        # 单实例唤醒监听：重复启动的进程会通知本实例把窗口带到前台
+        self._wake_handle = singleinstance.create_wake_handle()
+        self._wake_timer = QTimer(self)
+        self._wake_timer.timeout.connect(self._poll_wake)
+        self._wake_timer.start(300)
 
         # 首次使用：未设置保存目录则自动弹出设置窗口引导用户选择
         if not self.config.save_dir_ok():
@@ -1349,6 +1355,13 @@ class MainWindow(QMainWindow):
         if reason == QSystemTrayIcon.DoubleClick:
             self.show_up()
 
+    def _poll_wake(self):
+        """收到其他进程的唤醒请求：把主窗口恢复并带到前台。"""
+        if singleinstance.poll_wake(self._wake_handle):
+            self.setWindowState(self.windowState() & ~Qt.WindowMinimized
+                                | Qt.WindowActive)
+            self.show_up()
+
     def show_up(self):
         self.showNormal()
         self.raise_()
@@ -1417,6 +1430,17 @@ def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Signal快传")
     app.setWindowIcon(make_app_icon())
+
+    # 单实例：同一登录会话只允许一个主程序界面。重复启动时不弹新窗口，
+    # 而是唤醒已运行实例的主窗口，然后本进程静默退出。
+    if not singleinstance.acquire():
+        if not singleinstance.notify_existing():
+            QMessageBox.information(
+                None, "Signal 快传",
+                "Signal 快传已在运行，但暂时无法唤醒它的窗口。\n"
+                "请双击任务栏或托盘中的图标打开。")
+        return
+
     win = MainWindow()
     win.show()
     sys.exit(app.exec_())

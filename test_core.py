@@ -557,6 +557,20 @@ def main():
     report("fmt_size", core.fmt_size(110 * 1024 * 1024) == "110.0 MB",
            core.fmt_size(110 * 1024 * 1024))
 
+    # 11. 单实例锁（Windows 命名互斥锁 + 唤醒事件；后缀隔离，避开本机
+    #     正在运行的主程序实例，锁保持到测试进程退出由系统释放）
+    import singleinstance as _si
+    _sfx = "_测试隔离"
+    report("单实例锁首次获取", _si.acquire(_sfx) is True)
+    report("锁被持有探测", _si.is_locked(_sfx) is True)
+    report("不同锁名互不影响", _si.is_locked(_sfx + "2") is False)
+    _wh = _si.create_wake_handle(_sfx)
+    report("唤醒事件初始无信号", _si.poll_wake(_wh) is False)
+    _noked = _si.notify_existing(_sfx, retries=1, delay=0.05)
+    report("唤醒通知送达并置位", _noked is True and _si.poll_wake(_wh) is True,
+           "noked=%s" % _noked)
+    report("唤醒事件自动复位", _si.poll_wake(_wh) is False)
+
     a.close()
     b.close()
     print("\n===== 测试结果：%s =====" % ("全部通过 ✅" if OK else "存在失败 ❌"))
